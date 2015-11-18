@@ -8,28 +8,44 @@ require(ggplot2)
 require(gridExtra)
 
 shinyUI( fluidPage(
-  
-  dashboardPage(
-    dashboardHeader(title = "Gas sensors", 
-                    dropdownMenuOutput("notifs")),  # creating a notification menu for later use
+    includeCSS("Styles.css"), # Edit the CSS file to reflect the changes here
+    dashboardPage(skin = "black",
+    dashboardHeader(title = "Gas sensors", dropdownMenuOutput("notifs"), dropdownMenuOutput("tasks")),  
+    # creating a notification menu for later use if needed
     
-    sidebar <- dashboardSidebar(sidebarMenu(
-      menuItem("Office", tabName = "Office", icon = icon("th")),
+    sidebar <- dashboardSidebar(#width = 250,
+      sidebarMenu(
+      menuItem("Office", tabName = "Office", icon = icon("shekel")),
       menuItem("Nox", tabName = "Nox", icon = icon("th"))
       )),
     
-    body <- dashboardBody(tabItems(
+    body <- dashboardBody(
+        # Also add some custom CSS to make the title background area the same color as the rest of the header.
+        tags$head(tags$style(HTML('
+        .skin-black .main-header .logo {
+          background-color: #3c8dbc;
+        }
+        .skin-black .main-header .logo:hover {
+          background-color: #3c8dbc;
+        }
+      '))),
+        
+      tabItems(
       tabItem(tabName = "Office",
-              fluidRow(menuItemOutput("sensorselect"),
-                       textOutput("reactivetext1"),
-                       plotOutput("reactiveplot1")) ),
+              fluidRow(box(menuItemOutput("sensorselect"),
+                       textOutput("reactivetext1"))
+                       ),
+              fluidRow(box(plotOutput("reactiveplot1"),width = 12,background = "black",
+                           solidHeader = T,title = "Sensor readings",collapsible = T  ))),
       
       tabItem(tabName = "Nox",
-              fluidRow(menuItemOutput("selectcomponent"),
-                       textOutput("reactivetext2"),
-                       plotOutput("reactiveplot2")) )
-                                  )
-  
+              fluidRow(box(menuItemOutput("selectcomponent"),
+                       textOutput("reactivetext2")),
+                       box(menuItemOutput("sensorsview"))
+                       ),
+              fluidRow(box(plotOutput("reactiveplot2"), width = 12,title = "Sensor readings",status = "primary",
+                           solidHeader = T,collapsible = T )))
+                )
                           )
                 )
   
