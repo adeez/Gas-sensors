@@ -32,25 +32,25 @@ server <- function(input, output){
   })
   
   #TAB 1: OFFICE
-    output$sensorselect <- renderMenu({
-        selectInput("select", label = h4("Select sensor"), 
-            choices = c("Sensor A","Sensor B", "Sensor C"), selected = "Sensor A")
-    })
+    #output$sensorselect <- renderMenu({
+    #   selectInput("select", label = h4("Select sensor"), 
+    #        choices = c("Sensor A","Sensor B", "Sensor C"), selected = "Sensor A")
+    #})
     
-    output$reactivetext1 <- renderText({
-        paste("The visualizations for ", input$select)
-    })
+    #output$reactivetext1 <- renderText({
+    #    paste("The visualizations for ", input$select)
+    #})
     
-    output$reactiveplot1 <- renderPlot({
+    #output$reactiveplot1 <- renderPlot({
      #Added the null check as the first arg to switch becomes NULL by default before selection
-     if (is.null(input$select)) return()   
-        dataset <- switch(input$select,
-                          "Sensor A" = mt2m,
-                          "Sensor B"= mt3m,
-                          "Sensor C"= sensorist
-                          )
-       ggplot()+geom_line(data=dataset, aes(x=times, y=value, color=interaction(variable,sensor)))
-   })
+     #if (is.null(input$select)) return()   
+      #  dataset <- switch(input$select,
+     #                     "Sensor A" = mt2m,
+    #                     "Sensor B"= mt3m,
+    #                      "Sensor C"= sensorist
+    #                      )
+   #    ggplot()+geom_line(data=dataset, aes(x=times, y=value, color=interaction(variable,sensor)))
+  # })
    
     #TAB 2: NOX
     # selector menu should have year and month option and maybe even a specific date range selector
@@ -66,8 +66,10 @@ server <- function(input, output){
     output$sensorsview <- renderMenu({
         checkboxGroupInput("sensorsview", inline = T,
                            label = h4("Select the sensor to view"), 
+                           # Will need a reactive list of choices depending on the number of sensors in the db
                            choices = list("Sensor 1", "Sensor 2", "Sensor 3"), selected = "Sensor 1")
     })
+    react
     
     output$reactiveplot2<- renderPlot({
         if (is.null(input$selector)) return()   

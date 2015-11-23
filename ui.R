@@ -16,7 +16,8 @@ shinyUI( fluidPage(
     sidebar <- dashboardSidebar(#width = 250,
       sidebarMenu(
       menuItem("Office", tabName = "Office", icon = icon("shekel")),
-      menuItem("Nox", tabName = "Nox", icon = icon("th"))
+      menuItem("Nox", tabName = "Nox", icon = icon("th")),
+      menuItemOutput("sensorsview")
       )),
     
     body <- dashboardBody(
@@ -31,17 +32,16 @@ shinyUI( fluidPage(
       '))),
         
       tabItems(
-      tabItem(tabName = "Office",
-              fluidRow(box(menuItemOutput("sensorselect"),
-                       textOutput("reactivetext1"))
-                       ),
-              fluidRow(box(plotOutput("reactiveplot1"),width = 12,background = "black",
-                           solidHeader = T,title = "Sensor readings",collapsible = T  ))),
+      #tabItem(tabName = "Office",
+      #        fluidRow(box(menuItemOutput("sensorselect"),
+      #                 textOutput("reactivetext1"))
+      #                 ),
+      #        fluidRow(box(plotOutput("reactiveplot1"),width = 12,background = "black",
+      #                     solidHeader = T,title = "Sensor readings",collapsible = T  ))),
       
       tabItem(tabName = "Nox",
               fluidRow(box(menuItemOutput("selectcomponent"),
-                       textOutput("reactivetext2")),
-                       box(menuItemOutput("sensorsview"))
+                       textOutput("reactivetext2"))
                        ),
               fluidRow(box(plotOutput("reactiveplot2"), width = 12,title = "Sensor readings",status = "primary",
                            solidHeader = T,collapsible = T )))
