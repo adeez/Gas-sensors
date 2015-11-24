@@ -7,17 +7,18 @@ require(ggplot2)
 require(gridExtra)
 
 source(file = "nox_sensor_dataviz.R")
-mt2m <- read.csv("data/Temperature_Moisture_Log_Tag_2_melted.csv", stringsAsFactors = F)
-mt3m <- read.csv("data/Temperature_Moisture_Log_Tag_3_melted.csv", stringsAsFactors = F)
-sensorist <- read.csv("data/sensorist101115.csv", stringsAsFactors = F)
+##
+
+dataset <- nox14
+
+##
 
 server <- function(input, output){
-  #Put all these editing into functions
-  mt2m <- mt2m[,-1]; mt2m$times <- ymd_hms(mt2m$times)
-  mt3m <- mt3m[,-1]; mt3m$times <- ymd_hms(mt3m$times)
-  sensorist <- sensorist[,-1]; sensorist$times <- ymd_hms(sensorist$times); sensorist$variable <- sensorist$data.type
- 
-  # header dropdown menus
+    streetList <- dataset$Street
+    sensorList <- c(paste("Sensor",seq(1,10,1)))
+    datano <- no ; dataco <- co; datatemp <- temperature; datahumi <- humidity; databatt <- battery
+    
+    # header dropdown menus
     output$notifs <- renderMenu({
         dropdownMenu(type = "notifications", notificationItem( text=rep(paste("warning",seq(1,5,by=1))), icon("users")))
   })
@@ -32,60 +33,88 @@ server <- function(input, output){
   })
   
   #TAB 1: OFFICE
-    #output$sensorselect <- renderMenu({
-    #   selectInput("select", label = h4("Select sensor"), 
-    #        choices = c("Sensor A","Sensor B", "Sensor C"), selected = "Sensor A")
-    #})
-    
-    #output$reactivetext1 <- renderText({
-    #    paste("The visualizations for ", input$select)
-    #})
-    
-    #output$reactiveplot1 <- renderPlot({
-     #Added the null check as the first arg to switch becomes NULL by default before selection
-     #if (is.null(input$select)) return()   
-      #  dataset <- switch(input$select,
-     #                     "Sensor A" = mt2m,
-    #                     "Sensor B"= mt3m,
-    #                      "Sensor C"= sensorist
-    #                      )
-   #    ggplot()+geom_line(data=dataset, aes(x=times, y=value, color=interaction(variable,sensor)))
-  # })
-   
+      output$reactivetext1 <- renderText({
+       paste("The visualizations for ", input$select)
+    })
+      output$NO <- renderValueBox({
+          valueBox(
+              value = round(max(dataset[1,c(2,4,6)]),digits = 5), # the dataset should be reactive according to the sensor selected like the current one but flexible 
+              subtitle = "NO Sensors (last 1 min)", # This should be able to display the name of the sensor with the max data
+              icon = icon("area-chart"),
+              color = if (max(dataset[1,c(2,4,6)]) >= 0.04) "yellow" else "aqua"
+          )
+      })
+      output$CO <- renderValueBox({
+          valueBox(
+              value = round(max(dataset[1,c(8,10,12)]),digits = 5), # the dataset should be reactive according to the sensor selected like the current one but flexible 
+              subtitle = "CO Sensors (last 1 min)", # This should be able to display the name of the sensor with the max data
+              icon = icon("area-chart"),
+              color = if (max(dataset[1,c(8,10,12)]) >= 0.04) "yellow" else "aqua"
+          )
+      })
+      output$TEMPERATURE <- renderValueBox({
+          valueBox(
+              value = round(max(dataset[1,c(14,16,18)]),digits = 5), # the dataset should be reactive according to the sensor selectedlike the current one but flexible 
+              subtitle = "Temperature Sensors (last 1 min)", # This should be able to display the name of the sensor with the max data
+              icon = icon("area-chart"),
+              color = if (max(dataset[1,c(14,16,18)]) >= 0.04) "yellow" else "aqua"
+          )
+      })
+      output$HUMIDITY <- renderValueBox({
+          valueBox(
+              value = round(max(dataset[1,c(20,22,24)]),digits = 5), # the dataset should be reactive according to the sensor selectedlike the current one but flexible 
+              subtitle = "Max Humidity from Sensor name (last 1 min)", # This should be able to display the name of the sensor with the max data
+              icon = icon("area-chart"),
+              color = if (max(dataset[1,c(20,22,24)]) >= 0.04) "yellow" else "aqua"
+          )
+      })
+      
     #TAB 2: NOX
+    # output$value <- renderPrint({ input$dates })  To view the selected dates
     # selector menu should have year and month option and maybe even a specific date range selector
-    output$selectcomponent <- renderMenu({
-       selectInput("selector", label = h4("Select month to view"), 
-                   choices = c(as.character(seq(1,12,1))), selected = "10")
-   })
+    #output$selectcomponent <- renderMenu({
+    #    selectInput("selector", label = h4("Select month to view"), 
+    #               choices = c(as.character(seq(1,12,1))), selected = "10")
+   #})
    
     output$reactivetext2 <- renderText({
         paste("The test visualizations for ", input$selector)
+  })
+    
+    #output$sensorlocation <- renderMenu({
+    #    sidebarMenu(
+    #        menuItem(text = h4("Select Location"),tabName = "Nox" 
+                   # menuSubItem(selectInput("sensorloc",label = NULL ,
+                   #              choices = streetList, selected = streetList[1])), # point choices to a list of options from data)
+    #                )
+    #    )
+    #})
+    
+    output$sensorview <- renderMenu({
+        sidebarMenu(
+            menuItem(text = h4("Visualize"),tabName = "Nox" ,
+            menuSubItem(checkboxGroupInput(inputId = "sensorview", label = NULL, #h4("Select sensor"), 
+                                                choices = (paste("Sensor",seq(1,10,1))), selected = NULL)),
+            menuSubItem(checkboxGroupInput(inputId = "parameters", label = h4("Select the sensor to view"),
+                                           choices = list("CO","NO2","Temperature","Humidity","Battery"), selected = NULL))
+                    )
+            )
+            
     })
     
-    output$sensorsview <- renderMenu({
-        checkboxGroupInput("sensorsview", inline = T,
-                           label = h4("Select the sensor to view"), 
-                           # Will need a reactive list of choices depending on the number of sensors in the db
-                           choices = list("Sensor 1", "Sensor 2", "Sensor 3"), selected = "Sensor 1")
+    output$reactiveplot1<- renderPlot({
+        if (is.null(input$sensorview)) return()   
+                                
+        
     })
-    react
+ 
     
     output$reactiveplot2<- renderPlot({
-        if (is.null(input$selector)) return()   
-        #TODO
-        # would have to modify the if when data is in one db and will need to be more generic
-        # need to provide a key id using which the data can be accessed and visualized with possibly 1 line of code
-        if (input$selector == noxJan$Month[1]) myplot(noxJan)
-        if (input$selector == noxFeb$Month[1]) myplot(noxFeb)
-        if (input$selector == noxMarch$Month[1]) myplot(noxMarch)
-        if (input$selector == noxApril$Month[1]) myplot(noxApril)
-        if (input$selector == noxMay$Month[1]) myplot(noxMay)
-        if (input$selector == noxJune$Month[1]) myplot(noxJune)
-        if (input$selector == noxJuly$Month[1]) myplot(noxJuly)
-        if (input$selector == noxAug$Month[1]) myplot(noxAug)
-        if (input$selector == noxSept$Month[1]) myplot(noxSept)
-        if (input$selector == noxOct$Month[1]) myplot(noxOct)  
+        if (is.null(input$sensorview)) return()   
+       
+        
+        
+     
         
     })
   
