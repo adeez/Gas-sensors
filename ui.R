@@ -17,11 +17,11 @@ shinyUI( fluidPage(
 
     sidebar <- dashboardSidebar(#width = 250,
         sidebarMenu(
-            menuItem("Office", tabName = "Office", icon = icon("shekel")),
+            menuItem("Latest", tabName = "Latest", icon = icon("shekel")),
             menuItem("Nox", tabName = "Nox", icon = icon("th")),
             #sidebarMenuOutput("sensorlocation"),
             sidebarMenuOutput("sensorview"),
-            (dateRangeInput("dates", label = h4("Date range")))
+            (dateRangeInput("dates", label = h4("Date range"),start = "2015-01-01",end = "2015-01-10" ))
                     )          
             ),
     
@@ -38,7 +38,7 @@ shinyUI( fluidPage(
       '))),
         
       tabItems(
-      tabItem(tabName = "Office",
+      tabItem(tabName = "Latest",
               fluidRow(box(textOutput("reactivetext1"))
                        ),
               fluidRow(valueBoxOutput("NO")),
@@ -48,13 +48,8 @@ shinyUI( fluidPage(
               ),
       
       tabItem(tabName = "Nox",
-              fluidRow(#box(menuItemOutput("selectcomponent"),
-                       #textOutput("reactivetext2"))
-                       
-                          # verbatimTextOutput("value")),
-                      # box(chooserInput("inputs", leftLabel = "unselected", rightLabel = "selected", leftChoices = c("no","co","temperature","humidity","battery"),
-                     #                   rightChoices = c(),size = 10,multiple = T))
-                       ),
+              fluidRow(#box(textOutput("reactivetext2"))
+                        box(dataTableOutput("table"))),
               fluidRow(box(plotOutput("reactiveplot1"), width = 12,title = "NO",status = "success",
                            solidHeader = T,collapsible = T,collapsed = T )),
               fluidRow(box(plotOutput("reactiveplot2"), width = 12,title = "CO",status = "success",

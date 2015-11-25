@@ -70,16 +70,11 @@ server <- function(input, output){
       })
       
     #TAB 2: NOX
-    # output$value <- renderPrint({ input$dates })  To view the selected dates
-    # selector menu should have year and month option and maybe even a specific date range selector
-    #output$selectcomponent <- renderMenu({
-    #    selectInput("selector", label = h4("Select month to view"), 
-    #               choices = c(as.character(seq(1,12,1))), selected = "10")
-   #})
    
-    output$reactivetext2 <- renderText({
-        paste("The test visualizations for ", input$selector)
-  })
+    #output$reactivetext2 <- renderText({
+       # paste("The test visualizations for ", input$selector)
+    #    paste("The test visualizations for ", head(co$`nox14[, grep(pattern = "^DateTime.3$", x = names(nox14), value = T)]`))
+#  })
     
     #output$sensorlocation <- renderMenu({
     #    sidebarMenu(
@@ -89,14 +84,30 @@ server <- function(input, output){
     #                )
     #    )
     #})
+     
+      
+    output$table <- renderDataTable({
+        data <- switch(input$parameter,
+                       "CO" = co,
+                       "NO" = no,
+                       "Temperature" = temperature,
+                       "Humidity" = humidity,
+                       "Battery" = battery) 
+            
+        data <- data[data$date >= input$dates[1] & data$date <= input$dates[2],]
+            
+        
+    })  
     
     output$sensorview <- renderMenu({
         sidebarMenu(
             menuItem(text = h4("Visualize"),tabName = "Nox" ,
             menuSubItem(checkboxGroupInput(inputId = "sensorview", label = NULL, #h4("Select sensor"), 
                                                 choices = (paste("Sensor",seq(1,10,1))), selected = NULL)),
-            menuSubItem(checkboxGroupInput(inputId = "parameters", label = h4("Select the sensor to view"),
-                                           choices = list("CO","NO2","Temperature","Humidity","Battery"), selected = NULL))
+            #menuSubItem(checkboxGroupInput(inputId = "parameters", label = h4("Select the sensor to view"),
+            #                               choices = list("CO","NO2","Temperature","Humidity","Battery"), selected = NULL)),
+            menuSubItem(selectInput("parameter",label = h4("Select parameters to view"), selectize = T,
+                                    choices =list("CO","NO","Temperature","Humidity","Battery"),selected = NULL, multiple = T ))
                     )
             )
             
