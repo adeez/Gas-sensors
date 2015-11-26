@@ -5,6 +5,7 @@ require (dygraphs)
 require(lubridate)
 require(ggplot2)
 require(gridExtra)
+require(plotly)
 
 source(file = "nox_sensor_dataviz.R")
 ##
@@ -86,49 +87,103 @@ server <- function(input, output){
     #})
      
       
-    output$table <- renderDataTable({
-        data <- switch(input$parameter,
-                       "CO" = co,
-                       "NO" = no,
-                       "Temperature" = temperature,
-                       "Humidity" = humidity,
-                       "Battery" = battery) 
+    #output$table <- renderDataTable({
+     #   if (is.null(input$parameter)) return()  
+      #  data <- switch(input$parameter,
+      #                 "CO" = coMelted,
+       #               "NO" = noMelted,
+        #               "Temperature" = temperatureMelted,
+         #              "Humidity" = humidityMelted,
+          #             "Battery" = batteryMelted) 
             
-        data <- data[data$date >= input$dates[1] & data$date <= input$dates[2],]
-            
+    #    data <- data[data$date >= input$dates[1] & data$date <= input$dates[2],]
+    # data <- plotdata()       
         
-    })  
+    #})  
     
     output$sensorview <- renderMenu({
         sidebarMenu(
             menuItem(text = h4("Visualize"),tabName = "Nox" ,
             menuSubItem(checkboxGroupInput(inputId = "sensorview", label = NULL, #h4("Select sensor"), 
-                                                choices = (paste("Sensor",seq(1,10,1))), selected = NULL)),
+                                                choices = (paste("Sensor",seq(1,10,1))), selected = NULL))
             #menuSubItem(checkboxGroupInput(inputId = "parameters", label = h4("Select the sensor to view"),
             #                               choices = list("CO","NO2","Temperature","Humidity","Battery"), selected = NULL)),
-            menuSubItem(selectInput("parameter",label = h4("Select parameters to view"), selectize = T,
-                                    choices =list("CO","NO","Temperature","Humidity","Battery"),selected = NULL, multiple = T ))
+            #menuSubItem(selectInput("parameter",label = h4("Select parameters to view"), selectize = T,
+            #                        choices =list("CO","NO","Temperature","Humidity","Battery"),selected = NULL, multiple = T ))
                     )
             )
             
     })
     
-    output$reactiveplot1<- renderPlot({
-        if (is.null(input$sensorview)) return()   
-                                
+    # reactive datasets to be used in the different plots within the boxes
+    nodata <- reactive({
+    #    if (is.null(input$parameter)) return()   
+        data <- noMelted
+        data <- data[which((data$date >= input$dates[1] & data$date <= input$dates[2]) & (data$variable== input$sensorview )),]
         
+    })
+    
+    codata <- reactive({
+        #    if (is.null(input$parameter)) return()   
+        data <- coMelted
+        data <- data[which((data$date >= input$dates[1] & data$date <= input$dates[2]) & (data$variable== input$sensorview )),]
+        
+    })
+    
+    tempdata <- reactive({
+        data <- temperatureMelted
+        data <- data[which((data$date >= input$dates[1] & data$date <= input$dates[2]) & (data$variable== input$sensorview )),]
+        
+    })
+    
+    humidata <- reactive({
+        #    if (is.null(input$parameter)) return()   
+        data <- humidityMelted
+        data <- data[which((data$date >= input$dates[1] & data$date <= input$dates[2]) & (data$variable== input$sensorview )),]
+        
+    })
+    
+    battdata <- reactive({
+        #    if (is.null(input$parameter)) return()   
+        data <- batteryMelted
+        data <- data[which((data$date >= input$dates[1] & data$date <= input$dates[2]) & (data$variable== input$sensorview )),]
+        
+    })
+    
+    
+    # rendering plots
+    output$reactiveplot1<- renderPlot({
+        dataset <- nodata() #the subsetted data
+         print(ggplot(data = dataset, aes(x=time, y=value, color=variable))+geom_line())
     })
  
-    
     output$reactiveplot2<- renderPlot({
-        if (is.null(input$sensorview)) return()   
-       
-        
-        
-     
-        
+        dataset <- codata() #the subsetted data
+        print(ggplot(data = dataset, aes(x=time, y=value, color=variable))+geom_line())
     })
   
+    output$reactiveplot3<- renderPlot({
+        dataset <- tempdata() #the subsetted data
+        print(ggplot(data = dataset, aes(x=time, y=value, color=variable))+geom_line())
+    })
+    
+    output$reactiveplot4<- renderPlot({
+        dataset <- humidata() #the subsetted data
+        print(ggplot(data = dataset, aes(x=time, y=value, color=variable))+geom_line())
+    })
+    
+    output$reactiveplot5<- renderPlot({
+        dataset <- battdata() #the subsetted data
+        print(ggplot(data = dataset, aes(x=time, y=value, color=variable))+geom_line())
+    })
+    
+    output$trendPlot<- renderPlotly({
+        if (is.null(input$sensorview)) return()
+        dataset <- nodata() #the subsetted data
+        p <- ggplot(data = dataset, aes(x=time, y=value, color=variable))+geom_line()
+        pp <- ggplotly(p)
+        pp
+    })
     
 }
 

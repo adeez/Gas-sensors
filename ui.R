@@ -6,6 +6,7 @@ require(dygraphs)
 require(lubridate)
 require(ggplot2)
 require(gridExtra)
+require(plotly)
 
 #source("chooser.R")
 
@@ -49,7 +50,10 @@ shinyUI( fluidPage(
       
       tabItem(tabName = "Nox",
               fluidRow(#box(textOutput("reactivetext2"))
-                        box(dataTableOutput("table"))),
+                        #box(dataTableOutput("table")),
+                        ),
+              fluidRow(box(plotlyOutput("trendPlot"), width = 12,title = "NO PLOTLY",status = "warning",
+                           solidHeader = T,collapsible = T,collapsed = T )),
               fluidRow(box(plotOutput("reactiveplot1"), width = 12,title = "NO",status = "success",
                            solidHeader = T,collapsible = T,collapsed = T )),
               fluidRow(box(plotOutput("reactiveplot2"), width = 12,title = "CO",status = "success",
@@ -60,6 +64,7 @@ shinyUI( fluidPage(
                            solidHeader = T,collapsible = T,collapsed = T )),
               fluidRow(box(plotOutput("reactiveplot5"), width = 12,title = "Battery",status = "success",
                            solidHeader = T,collapsible = T,collapsed = T )))
+              
                )
                           )
                 )
